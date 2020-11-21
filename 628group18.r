@@ -20,27 +20,35 @@ Chinese_food_review <- subset(review,review$business_id%in%Chinese_food_business
 Chinese_food_tip <- subset(tip,tip$business_id%in%Chinese_food_business_ID)
 #get related tips
 
-# unnest_tokens
 text<-Chinese_food_review$text
 text<-gsub(pattern = c('[0-9[:punct:]]+?'),replacement ="",text)
-#remove number
+#remove number and punctuations
 id<-Chinese_food_review$review_id
 review_and_id <- data.frame(line = id, text = text)
 
-k<-unnest_tokens(review_and_id,word, text)
-word <- count(k$word)$x
-p<-length(word)
+
+k<-unnest_tokens(review_and_id,word,text)
+frequency_of_words<-count(k$word)
+
+
+all_word <- frequency_of_words$x[frequency_of_words$freq>=10]
+#remove the words whose frequency < 10
+all_word <-all_word[all_word%in%stop_words$word==FALSE]
+#remove stopwords
+k<-subset(k,k$word%in%all_word)
+#remove the words whose frequency < 10
+
+p<-length(all_word)
 n<-length(text)
 
-reviw_to_word<-matrix(ncol = p,nrow = n)
 stat<-Sys.time()
-row_name<-rep(0,p)
+row_name<-list()
 for (i in 1:n){
   
-  index <-which(word%in%k$word[(k$line==id[i])])
+  index <-which(all_word%in%k$word[(k$line==id[i])])
   vector<-rep(0,p)
   vector[index] <- count(k$word[(k$line==id[i])])$freq
-  row_name<-rbind(row_name,vector)
+  row_name[[i]]<-vector
 }
 end<-Sys.time()
 end-stat
