@@ -52,3 +52,36 @@ for (i in 1:n){
 }
 end<-Sys.time()
 end-stat
+
+
+stars=c()
+stars$stars=Chinese_food_review$stars
+stars$uniqueID=Chinese_food_review$review_id
+matrix=matrix(data=0,nrow=n,ncol=p)
+for(i in 1:n){
+  index <-which(all_word%in%k$word[(k$line==id[i])])
+  matrix[i,index] <- count(k$word[(k$line==id[i])])$freq
+}
+dimnames(matrix)=list(review_and_id$line,all_word)
+
+plotWordStar <- function(stars,DTM,wordList,mfrow = c(4,4)) {
+  par(mfrow = mfrow)
+  col_DTM = colnames(DTM)
+  for(i in 1:length(wordList)) {
+    index = which(col_DTM == wordList[i])
+    if(length(index) == 0) {
+      warning(paste(wordList[i],"not detected"))
+      next
+    } 
+    dtm_vec = as.numeric(DTM[,index])
+    namescol = rownames(DTM)[dtm_vec>0]
+    starsY = rep(0,5)
+    for(j in 1:5) {
+      element = sum(namescol%in%(stars$uniqueID[which(stars$stars == j)]))
+      starsY[j]  = element / sum(stars$stars == j)
+    }
+    barplot(starsY,main=wordList[i],xlab="Stars",ylab="Word Freq")
+  }  
+}
+wordList=c("bad","worst","awful","horrible","mediocre","average","moderate","ordinary","decent","warm","nice","affordable","fantastic","excellent","wonderful","terrific")
+plotWordStar(stars,matrix,wordList)
