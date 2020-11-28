@@ -170,11 +170,11 @@ plotWordStar(stars_id,review_vs_word_matix,food_word,mfrow=c(2,4))
 plotWordStar(stars_id,review_vs_word_matix,drink_word,mfrow=c(2,4))
 
 
-index=c()
+index_taste=c()
 for(i in 1:length(taste_word)) {
-  index = append(index,which(all_word == taste_word[i]))
+  index_taste = append(index_taste,which(all_word == taste_word[i]))
 }
-data=review_vs_word_matix[,index]
+data=review_vs_word_matix[,index_taste]
 for(i in 1:length(index)){
   for(j in 1:length(data[,i])){
     if(data[j,i]>0) data[j,i]=1
@@ -185,13 +185,15 @@ data1=t(data1)
 data1=as.data.frame(data1)
 model1=lm(V1~.,data=data1)
 anova(model1)
+#good:sweet,spicy,bland,crispy
+#bad:salty,greasy
 
-index=c()
+index_food=c()
 for(i in 1:length(food_word)) {
-  index = append(index,which(all_word == food_word[i]))
+  index_food = append(index_food,which(all_word == food_word[i]))
 }
-data=review_vs_word_matix[,index]
-for(i in 1:length(index)){
+data=review_vs_word_matix[,index_food]
+for(i in 1:length(index_food)){
   for(j in 1:length(data[,i])){
     if(data[j,i]>0) data[j,i]=1
   }
@@ -201,12 +203,14 @@ data1=t(data1)
 data1=as.data.frame(data1)
 model2=lm(V1~.,data=data1)
 anova(model2)
+#good:cream,sushi,steak
+#bad:burger,chicken
 
-index=c()
+index_drink=c()
 for(i in 1:length(drink_word)) {
-  index = append(index,which(all_word == drink_word[i]))
+  index_drink = append(index_drink,which(all_word == drink_word[i]))
 }
-data=review_vs_word_matix[,index]
+data=review_vs_word_matix[,index_drink]
 for(i in 1:length(index)){
   for(j in 1:length(data[,i])){
     if(data[j,i]>0) data[j,i]=1
@@ -217,3 +221,56 @@ data1=t(data1)
 data1=as.data.frame(data1)
 model3=lm(V1~.,data=data1)
 anova(model3)
+#good:coffee,tea,wine
+#bad:water
+
+getparameter=function(id){
+  index=which(id==Chinese_food_review$business_id)
+  if(length(index)==0){
+    return("Your given id is not a Chinese restaurant!")
+  }
+  else{
+    matrix_taste=review_vs_word_matix[index,index_taste]
+    matrix_food=review_vs_word_matix[index,index_food]
+    matrix_drink=review_vs_word_matix[index,index_drink]
+    r=c()
+    temp=c()
+    for(i in 1:8){
+      temp[i]=sum(matrix_taste[,i])
+    }
+    tempgood=temp[c(1,2,5,7)]
+    tempbad=temp[c(4,8)]
+    r$tastegood=c(1,2,5,7)[which(tempgood==min(tempgood))[1]]
+    r$tastebad=ifelse(max(tempbad)>0,c(4,8)[which(tempbad==max(tempbad))[1]],0)
+    temp=c()
+    for(i in 1:8){
+      temp[i]=sum(matrix_food[,i])
+    }
+    tempgood=temp[c(5,7,8)]
+    tempbad=temp[c(2,4)]
+    r$foodgood=c(5,7,8)[which(tempgood==min(tempgood))[1]]
+    r$foodbad=ifelse(max(tempbad)>0,c(2,4)[which(tempbad==max(tempbad))[1]],0)
+    temp=c()
+    for(i in 1:7){
+      temp[i]=sum(matrix_drink[,i])
+    }
+    tempgood=temp[c(2,4,6)]
+    r$drinkgood=c(2,4,6)[which(tempgood==min(tempgood))[1]]
+    if(temp[7]>0) r$drinkbad=7
+    else r$drinkbad=0
+  }
+  return(r)
+}
+
+suggestion=function(r){
+  print(paste("more ",taste_word[r$tastegood],sep=""))
+  if(r$tastebad!=0) print(paste("less ",taste_word[r$tastebad],sep=""))
+  print(paste("more ",food_word[r$foodgood],sep=""))
+  if(r$foodbad!=0) print(paste("less ",food_word[r$foodbad],sep=""))
+  print(paste("more ",drink_word[r$drinkgood],sep=""))
+  if(r$drinkbad!=0) print(paste("less ",drink_word[r$drinkbad],sep=""))
+}
+
+id=Chinese_food_business_ID[5]
+r=getparameter(id)
+suggestion(r)
