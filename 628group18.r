@@ -158,3 +158,62 @@ colnames(word_propo)[which(word_propo[5,]>0.7)]
 
 #select the word with >80% 1star
 colnames(word_propo)[which(word_propo[1,]>0.8)]
+
+all_word_1 <- frequency_of_words$x[frequency_of_words$freq>=800]
+all_word_1 <-all_word_1[all_word_1%in%stop_words$word==FALSE]
+all_word_1
+taste_word=c("sweet","spicy","bitter","salty","bland","sour","crispy","greasy")
+food_word=c("bread","burger","cheese","chicken","cream","pizza","sushi","steak")
+drink_word=c("beer","coffee","soup","tea","milk","wine","water")
+plotWordStar(stars_id,review_vs_word_matix,taste_word,mfrow=c(2,4))
+plotWordStar(stars_id,review_vs_word_matix,food_word,mfrow=c(2,4))
+plotWordStar(stars_id,review_vs_word_matix,drink_word,mfrow=c(2,4))
+
+
+index=c()
+for(i in 1:length(taste_word)) {
+  index = append(index,which(all_word == taste_word[i]))
+}
+data=review_vs_word_matix[,index]
+for(i in 1:length(index)){
+  for(j in 1:length(data[,i])){
+    if(data[j,i]>0) data[j,i]=1
+  }
+}
+data1=rbind(t(stars),t(data))
+data1=t(data1)
+data1=as.data.frame(data1)
+model1=lm(V1~.,data=data1)
+anova(model1)
+
+index=c()
+for(i in 1:length(food_word)) {
+  index = append(index,which(all_word == food_word[i]))
+}
+data=review_vs_word_matix[,index]
+for(i in 1:length(index)){
+  for(j in 1:length(data[,i])){
+    if(data[j,i]>0) data[j,i]=1
+  }
+}
+data1=rbind(t(stars),t(data))
+data1=t(data1)
+data1=as.data.frame(data1)
+model2=lm(V1~.,data=data1)
+anova(model2)
+
+index=c()
+for(i in 1:length(drink_word)) {
+  index = append(index,which(all_word == drink_word[i]))
+}
+data=review_vs_word_matix[,index]
+for(i in 1:length(index)){
+  for(j in 1:length(data[,i])){
+    if(data[j,i]>0) data[j,i]=1
+  }
+}
+data1=rbind(t(stars),t(data))
+data1=t(data1)
+data1=as.data.frame(data1)
+model3=lm(V1~.,data=data1)
+anova(model3)
