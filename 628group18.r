@@ -296,3 +296,55 @@ suggestion=function(r){
 id=Chinese_food_business_ID[5]
 r=getparameter(id)
 suggestion(r)
+
+
+combo_word<- c("sweet","spicy","bitter","salty","bland","sour","crispy","chicken","fish","beef","soup","tea")
+plotWordStar(stars_id,review_vs_word_matix,combo_word,mfrow=c(3,4))
+index_combo=c()
+for(i in 1:length(combo_word)) {
+  index_combo = append(index_combo,which(all_word == combo_word[i]))
+}
+data=review_vs_word_matix[,index_combo]
+for(i in 1:length(index_combo)){
+  for(j in 1:length(data[,i])){
+    if(data[j,i]>0) data[j,i]=1
+  }
+}
+data4=rbind(t(stars),t(data))
+data4=t(data4)
+data4=as.data.frame(data4)
+model4=lm(V1~.*.,data=data4)
+k<-anova(model4)
+q<-summary(model4)
+index_final<-unique(c(c(1:13),as.numeric(which((k$`Pr(>F)`<0.25)&(abs(q$coefficients[,4])<0.5)))))
+q$coefficients[index_final,]                  
+k$`Pr(>F)`[index_final]
+
+par(mfrow = c(2,2))
+plot(model4)
+
+sweet_add <- mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)=="sweet")]==0)])
+sweet_not_add <- mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)=="sweet")]!=0)])
+
+compare_plot <- function(words){
+  
+  have<-mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]==0)])
+  have_not <-mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]!=0)])
+  
+  #barplot(have,have_not)
+  return(c(have,have_not))
+}
+
+result<-lapply(combo_word,compare_plot)
+result <- matrix(unlist(result),ncol=12,nrow=2)
+dimnames(result)=list(c("have not","have"),combo_word)
+par(mfrow = c(1,1))
+barplot(result[,1:3],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5))
+legend("topright",legend = c("have not","have"),col=c("yellow","blue"),lty = c(1,1),lwd=8,cex=1)
+barplot(result[,4:6],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5))
+legend("topright",legend = c("have not","have"),col=c("yellow","blue"),lty = c(1,1),lwd=8,cex=1)
+barplot(result[,7:9],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5))
+legend("topright",legend = c("have not","have"),col=c("yellow","blue"),lty = c(1,1),lwd=8,cex=1)
+barplot(result[,10:12],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5))
+legend("topright",legend = c("have not","have"),col=c("yellow","blue"),lty = c(1,1),lwd=8,cex=1)
+par(mfrow = c(1,1))
