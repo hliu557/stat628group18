@@ -162,6 +162,8 @@ colnames(word_propo)[which(word_propo[1,]>0.8)]
 all_word_1 <- frequency_of_words$x[frequency_of_words$freq>=800]
 all_word_1 <-all_word_1[all_word_1%in%stop_words$word==FALSE]
 all_word_1
+
+#Choose the following words mainly based on the frequency.
 taste_word=c("sweet","spicy","bitter","salty","bland","sour","crispy","greasy")
 food_word=c("bread","burger","cheese","chicken","cream","pizza","sushi","steak")
 drink_word=c("beer","coffee","soup","tea","milk","wine","water")
@@ -238,6 +240,8 @@ getparameter=function(id){
     for(i in 1:8){
       temp[i]=sum(matrix_taste[,i])
     }
+    #good:sweet,spicy,bland,crispy (corresponding to 1,2,5,7)
+    #bad:salty,greasy (corresponding to 4,8)
     tempgood=temp[c(1,2,5,7)]
     tempbad=temp[c(4,8)]
     r$tastegood=c(1,2,5,7)[which(tempgood==min(tempgood))[1]]
@@ -246,6 +250,8 @@ getparameter=function(id){
     for(i in 1:8){
       temp[i]=sum(matrix_food[,i])
     }
+    #good:cream,sushi,steak (corresponding to 5,7,8)
+    #bad:burger,chicken (corresponding to 2,4)
     tempgood=temp[c(5,7,8)]
     tempbad=temp[c(2,4)]
     r$foodgood=c(5,7,8)[which(tempgood==min(tempgood))[1]]
@@ -254,12 +260,14 @@ getparameter=function(id){
     for(i in 1:7){
       temp[i]=sum(matrix_drink[,i])
     }
+    #good:coffee,tea,wine (corresponding to 2,4,6)
+    #bad:water (corresponding to 7)
     tempgood=temp[c(2,4,6)]
     r$drinkgood=c(2,4,6)[which(tempgood==min(tempgood))[1]]
     if(temp[7]>0) r$drinkbad=7
     else r$drinkbad=0
   }
-  return(r)
+  return(r)#for each components, a value is corresponding to a word, 0 means no bad word need to be improved.
 }
 
 suggestion=function(r){
@@ -271,6 +279,8 @@ suggestion=function(r){
   if(r$drinkbad!=0) print(paste("less ",drink_word[r$drinkbad],sep=""))
 }
 
+
+#example
 id=Chinese_food_business_ID[5]
 r=getparameter(id)
 suggestion(r)
