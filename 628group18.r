@@ -177,7 +177,7 @@ for(i in 1:length(taste_word)) {
   index_taste = append(index_taste,which(all_word == taste_word[i]))
 }
 data=review_vs_word_matix[,index_taste]
-for(i in 1:length(index)){
+for(i in 1:length(index_taste)){
   for(j in 1:length(data[,i])){
     if(data[j,i]>0) data[j,i]=1
   }
@@ -189,6 +189,10 @@ model1=lm(V1~.,data=data1)
 anova(model1)
 #good:sweet,spicy,bland,crispy
 #bad:salty,greasy
+m1=lm(V1~sweet+spicy+salty+bland+crispy+greasy,data=data1)
+anova(m1)
+par(mfrow=c(2,2))
+plot(m1)
 
 index_food=c()
 for(i in 1:length(food_word)) {
@@ -205,6 +209,10 @@ data1=t(data1)
 data1=as.data.frame(data1)
 model2=lm(V1~.,data=data1)
 anova(model2)
+m2=lm(V1~burger+chicken+cream+sushi+steak,data=data1)
+anova(m2)
+par(mfrow=c(2,2))
+plot(m2)
 #good:cream,sushi,steak
 #bad:burger,chicken
 
@@ -213,7 +221,7 @@ for(i in 1:length(drink_word)) {
   index_drink = append(index_drink,which(all_word == drink_word[i]))
 }
 data=review_vs_word_matix[,index_drink]
-for(i in 1:length(index)){
+for(i in 1:length(index_drink)){
   for(j in 1:length(data[,i])){
     if(data[j,i]>0) data[j,i]=1
   }
@@ -225,6 +233,10 @@ model3=lm(V1~.,data=data1)
 anova(model3)
 #good:coffee,tea,wine
 #bad:water
+m3=lm(V1~coffee+tea+milk+wine+water,data=data1)
+anova(m3)
+par(mfrow=c(2,2))
+plot(m3)
 
 getparameter=function(id){
   index=which(id==Chinese_food_review$business_id)
