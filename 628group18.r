@@ -23,13 +23,13 @@ Chinese_food_tip <- subset(tip,tip$business_id%in%Chinese_food_business_ID)
 
 Review_text<-Chinese_food_review$text
 Review_text<-gsub(pattern = c('[0-9]'),replacement ="",Review_text)
-Review_text<-gsub(pattern = c('[[:punct:]]'),replacement ="",Review_text)
 Review_text<- tolower(Review_text)
 Review_text<-gsub(pattern = "I'm",replacement ="I am",Review_text)
 Review_text<-gsub(pattern = "you're",replacement ="you are",Review_text)
 Review_text<-gsub(pattern = "he's",replacement ="he is",Review_text)
 Review_text<-gsub(pattern = "she's",replacement ="she is",Review_text)
 Review_text<-gsub(pattern = "n't",replacement =" not",Review_text)
+Review_text<-gsub(pattern = c('[[:punct:]]'),replacement ="",Review_text)
 Review_text<-gsub(pattern = c("not |no |never "),replacement ="non",Review_text)
 Review_text<-gsub(pattern = c("'"),replacement ="",Review_text)
 #remove number and punctuations
@@ -154,10 +154,10 @@ Review_text[which(review_vs_word_matix[,which((colnames(review_vs_word_matix)=="
 
 
 #select the word with >80% 5star
-colnames(word_propo)[which(word_propo[5,]>0.7)]
+#colnames(word_propo)[which(word_propo[5,]>0.7)]
 
 #select the word with >80% 1star
-colnames(word_propo)[which(word_propo[1,]>0.8)]
+#colnames(word_propo)[which(word_propo[1,]>0.8)]
 
 all_word_1 <- frequency_of_words$x[frequency_of_words$freq>=800]
 all_word_1 <-all_word_1[all_word_1%in%stop_words$word==FALSE]
