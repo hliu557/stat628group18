@@ -140,17 +140,13 @@ pearson_test <- function(p_j0,p_j=star_rate){
   return(Q)
   #return(p_value)
 }
-
+#get
 word_Q_value<-apply(word_propo,MARGIN = 2,pearson_test)
-
 affect_of_word<-all_word[order(word_Q_value,decreasing = TRUE)]
-affect_of_word[100:150]
 
-plotWordStar(stars_id,review_vs_word_matix,affect_of_word[106])
 
-which((colnames(review_vs_word_matix)=="argued"))
-which(review_vs_word_matix[,which((colnames(review_vs_word_matix)=="argued"))]!=0&stars==5)
-Review_text[which(review_vs_word_matix[,which((colnames(review_vs_word_matix)=="argued"))]!=0&stars==5)]
+
+
 
 
 #select the word with >80% 5star
@@ -238,6 +234,73 @@ anova(m3)
 par(mfrow=c(2,2))
 plot(m3)
 
+#final model choose
+
+combo_word<- c("sweet","spicy","bitter","salty","bland","sour","crispy","chicken","fish","beef","soup","tea")
+plotWordStar(stars_id,review_vs_word_matix,combo_word,mfrow=c(3,4))
+index_combo=c()
+for(i in 1:length(combo_word)) {
+  index_combo = append(index_combo,which(all_word == combo_word[i]))
+}
+data=review_vs_word_matix[,index_combo]
+for(i in 1:length(index_combo)){
+  for(j in 1:length(data[,i])){
+    if(data[j,i]>0) data[j,i]=1
+  }
+}
+data4=rbind(t(stars),t(data))
+data4=t(data4)
+data4=as.data.frame(data4)
+model4=lm(V1~.*.,data=data4)
+k<-anova(model4)
+q<-summary(model4)
+index_final<-unique(c(c(1:13),as.numeric(which((k$`Pr(>F)`<0.25)&(abs(q$coefficients[,4])<0.5)))))
+q$coefficients[index_final,]                  
+k$`Pr(>F)`[index_final]
+par(mfrow = c(2,2))
+plot(model4)
+
+
+#2 sample T-test part 
+compare_plot <- function(words){
+  
+  have_not<-mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]==0)])
+  have <-mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]!=0)])
+  
+  #barplot(have,have_not)
+  return(c(have_not,have))
+}
+
+result<-lapply(combo_word,compare_plot)
+result <- matrix(unlist(result),ncol=12,nrow=2)
+dimnames(result)=list(c("not included","included"),combo_word)
+
+mean(stars)
+#pplot the differences
+barplot(result[,1:3],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5),legend.text = TRUE,args.legend = list(cex=0.8,x=9,y=5.5),ylab =c( "Ratings"))
+text(x=c(1,2,4,5,7,8)+0.5,y=c(result[,1],result[,2],result[,3]),pos = 3,labels=round(c(result[,1],result[,2],result[,3]),3),col='red',cex=1.2)
+barplot(result[,4:6],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5),legend.text = TRUE,args.legend = list(cex=0.8,x=9,y=5.5),ylab = "Ratings")
+text(x=c(1,2,4,5,7,8)+0.5,y=c(result[,4],result[,5],result[,6]),pos = 3,labels=round(c(result[,4],result[,5],result[,6]),3),col='red',cex=1.2)
+barplot(result[,7:9],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5),legend.text = TRUE,args.legend = list(cex=0.8,x=9,y=5.5),ylab = "Ratings")
+text(x=c(1,2,4,5,7,8)+0.5,y=c(result[,7],result[,7],result[,9]),pos = 3,labels=round(c(result[,7],result[,8],result[,9]),3),col='red',cex=1.2)
+barplot(result[,10:12],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5),legend.text = TRUE,args.legend = list(cex=0.8,x=9,y=5.5),ylab = "Ratings")
+text(x=c(1,2,4,5,7,8)+0.5,y=c(result[,10],result[,11],result[,12]),pos = 3,labels=round(c(result[,10],result[,11],result[,12]),3),col='red',cex=1.2)
+
+#test
+p_values<-vector()
+for (i in 1:dim(result)[2]) {
+  words=colnames(result)[i]
+  p[i]<-t.test(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]==0)],stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]!=0)])$p.value
+  
+}
+p_values
+
+
+
+
+
+
+#suggestion function
 getparameter=function(id){
   index=which(id==Chinese_food_review$business_id)
   if(length(index)==0){
@@ -296,55 +359,3 @@ suggestion=function(r){
 id=Chinese_food_business_ID[5]
 r=getparameter(id)
 suggestion(r)
-
-
-combo_word<- c("sweet","spicy","bitter","salty","bland","sour","crispy","chicken","fish","beef","soup","tea")
-plotWordStar(stars_id,review_vs_word_matix,combo_word,mfrow=c(3,4))
-index_combo=c()
-for(i in 1:length(combo_word)) {
-  index_combo = append(index_combo,which(all_word == combo_word[i]))
-}
-data=review_vs_word_matix[,index_combo]
-for(i in 1:length(index_combo)){
-  for(j in 1:length(data[,i])){
-    if(data[j,i]>0) data[j,i]=1
-  }
-}
-data4=rbind(t(stars),t(data))
-data4=t(data4)
-data4=as.data.frame(data4)
-model4=lm(V1~.*.,data=data4)
-k<-anova(model4)
-q<-summary(model4)
-index_final<-unique(c(c(1:13),as.numeric(which((k$`Pr(>F)`<0.25)&(abs(q$coefficients[,4])<0.5)))))
-q$coefficients[index_final,]                  
-k$`Pr(>F)`[index_final]
-
-par(mfrow = c(2,2))
-plot(model4)
-
-sweet_add <- mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)=="sweet")]==0)])
-sweet_not_add <- mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)=="sweet")]!=0)])
-
-compare_plot <- function(words){
-  
-  have<-mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]==0)])
-  have_not <-mean(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]!=0)])
-  
-  #barplot(have,have_not)
-  return(c(have,have_not))
-}
-
-result<-lapply(combo_word,compare_plot)
-result <- matrix(unlist(result),ncol=12,nrow=2)
-dimnames(result)=list(c("have not","have"),combo_word)
-par(mfrow = c(1,1))
-barplot(result[,1:3],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5))
-legend("topright",legend = c("have not","have"),col=c("yellow","blue"),lty = c(1,1),lwd=8,cex=1)
-barplot(result[,4:6],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5))
-legend("topright",legend = c("have not","have"),col=c("yellow","blue"),lty = c(1,1),lwd=8,cex=1)
-barplot(result[,7:9],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5))
-legend("topright",legend = c("have not","have"),col=c("yellow","blue"),lty = c(1,1),lwd=8,cex=1)
-barplot(result[,10:12],beside=TRUE,col=c("yellow","blue"),ylim = c(0,5))
-legend("topright",legend = c("have not","have"),col=c("yellow","blue"),lty = c(1,1),lwd=8,cex=1)
-par(mfrow = c(1,1))
