@@ -301,7 +301,7 @@ p_values
 
 
 
-getparameter1=function(id){
+getparameter=function(id){
   index=which(id==Chinese_food_review$business_id)
   if(length(index)==0){
     return("Your given id is not a Chinese restaurant!")
@@ -324,7 +324,7 @@ getparameter1=function(id){
   return(r)#for each components, a value is corresponding to a word, 0 means no bad word need to be improved.
 }
 
-suggestion1=function(r1){
+suggestion=function(r1){
   print(paste("more ",combo_word[r1$good],sep=""))
   if(sum(r1$good%in%c(1,2))==2) print("But do not mix spicy and sweet food together.")
   if(sum(r1$good%in%c(2,10))==2) print("But do not mix spicy and beef together.")
@@ -333,5 +333,5 @@ suggestion1=function(r1){
 }
 
 id=Chinese_food_business_ID[4]
-r1=getparameter1(id)
-suggestion1(r1)
+r1=getparameter(id)
+suggestion(r1)
