@@ -338,3 +338,4 @@ suggestion(r1)
 
 write.csv(Chinese_food_review,"Chinese_food_review.csv")
 write.csv(review_vs_word_matix,"review_vs_word_matrix.csv")
+write.csv(Open[Chinese_food,],"Chinese_food_information.csv")
