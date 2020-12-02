@@ -14,7 +14,7 @@ business <- jsonlite::stream_in(file("business_city.json"))
 Open <- business[business$is_open==1,]
 Chinese_food <- grep(pattern = c('Chinese|chinese'),Open$categories)
 #Chinese resteraunt still open
-Chinese_food_business_ID <-business$business_id[Chinese_food]
+Chinese_food_business_ID <-Open$business_id[Chinese_food]
 #get business ID
 Chinese_food_review <- subset(review,review$business_id%in%Chinese_food_business_ID)
 #get related review
