@@ -290,7 +290,7 @@ text(x=c(1,2,4,5,7,8)+0.5,y=c(result[,10],result[,11],result[,12]),pos = 3,label
 p_values<-vector()
 for (i in 1:dim(result)[2]) {
   words=colnames(result)[i]
-  p[i]<-t.test(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]==0)],stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]!=0)])$p.value
+  p_values[i]<-t.test(stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]==0)],stars[which(review_vs_word_matix[,which(colnames(review_vs_word_matix)==words)]!=0)])$p.value
   
 }
 p_values
