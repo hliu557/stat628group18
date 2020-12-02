@@ -1,4 +1,3 @@
-
 rm(list=ls())
 library(rjson)
 library(jsonlite)
@@ -14,7 +13,7 @@ business <- jsonlite::stream_in(file("business_city.json"))
 Open <- business[business$is_open==1,]
 Chinese_food <- grep(pattern = c('Chinese|chinese'),Open$categories)
 #Chinese resteraunt still open
-Chinese_food_business_ID <-business$business_id[Chinese_food]
+Chinese_food_business_ID <-Open$business_id[Chinese_food]
 #get business ID
 Chinese_food_review <- subset(review,review$business_id%in%Chinese_food_business_ID)
 #get related review
@@ -251,15 +250,17 @@ for(i in 1:length(index_combo)){
 data4=rbind(t(stars),t(data))
 data4=t(data4)
 data4=as.data.frame(data4)
+rownames(data4)<-NULL
 model4=lm(V1~.*.,data=data4)
 k<-anova(model4)
 q<-summary(model4)
-index_final<-unique(c(c(1:13),as.numeric(which((k$`Pr(>F)`<0.25)&(abs(q$coefficients[,4])<0.5)))))
+index_final<-unique(c(c(1:13),as.numeric(which((k$`Pr(>F)`<0.05)&(abs(q$coefficients[,4])<0.1)))))
 q$coefficients[index_final,]                  
-k$`Pr(>F)`[index_final]
+k$`Pr(>F)`[unique(c(c(1:12),as.numeric(which((k$`Pr(>F)`<0.05)&(abs(q$coefficients[,4])<0.1)))))]
 par(mfrow = c(2,2))
 plot(model4)
 
+par(mfrow = c(1,1))
 
 #2 sample T-test part 
 compare_plot <- function(words){
@@ -300,42 +301,63 @@ p_values
 
 
 
-
+#suggestion function
 getparameter=function(id){
   index=which(id==Chinese_food_review$business_id)
   if(length(index)==0){
     return("Your given id is not a Chinese restaurant!")
   }
   else{
-    matrix_combo=review_vs_word_matix[index,index_combo]
+    matrix_taste=review_vs_word_matix[index,index_taste]
+    matrix_food=review_vs_word_matix[index,index_food]
+    matrix_drink=review_vs_word_matix[index,index_drink]
     r=c()
     temp=c()
-    for(i in 1:12){
-      temp[i]=sum(matrix_combo[,i])
+    for(i in 1:8){
+      temp[i]=sum(matrix_taste[,i])
     }
-    #good: corresponding to 1,2,7,10,11,12
-    #bad:corresponding to 3,4,5,6,8,9
-    tempgood=temp[c(1,2,7,10,11,12)]
-    tempbad=temp[c(3,4,5,6,8,9)]
-    r$good=c(1,2,7,10,11,12)[which(tempgood%in%sort(tempgood)[1:2])[1:2]]
-    if(max(tempbad)==0) r$bad=0
-    else r$bad=c(3,4,5,6,8,9)[which(tempbad%in%sort(tempbad,decreasing=TRUE)[1:2])[1:2]]
+    #good:sweet,spicy,bland,crispy (corresponding to 1,2,5,7)
+    #bad:salty,greasy (corresponding to 4,8)
+    tempgood=temp[c(1,2,5,7)]
+    tempbad=temp[c(4,8)]
+    r$tastegood=c(1,2,5,7)[which(tempgood==min(tempgood))[1]]
+    r$tastebad=ifelse(max(tempbad)>0,c(4,8)[which(tempbad==max(tempbad))[1]],0)
+    temp=c()
+    for(i in 1:8){
+      temp[i]=sum(matrix_food[,i])
+    }
+    #good:cream,sushi,steak (corresponding to 5,7,8)
+    #bad:burger,chicken (corresponding to 2,4)
+    tempgood=temp[c(5,7,8)]
+    tempbad=temp[c(2,4)]
+    r$foodgood=c(5,7,8)[which(tempgood==min(tempgood))[1]]
+    r$foodbad=ifelse(max(tempbad)>0,c(2,4)[which(tempbad==max(tempbad))[1]],0)
+    temp=c()
+    for(i in 1:7){
+      temp[i]=sum(matrix_drink[,i])
+    }
+    #good:coffee,tea,wine (corresponding to 2,4,6)
+    #bad:water (corresponding to 7)
+    tempgood=temp[c(2,4,6)]
+    r$drinkgood=c(2,4,6)[which(tempgood==min(tempgood))[1]]
+    if(temp[7]>0) r$drinkbad=7
+    else r$drinkbad=0
   }
   return(r)#for each components, a value is corresponding to a word, 0 means no bad word need to be improved.
 }
 
-suggestion=function(r1){
-  print(paste("more ",combo_word[r1$good],sep=""))
-  if(sum(r1$good%in%c(1,2))==2) print("But do not mix spicy and sweet food together.")
-  if(sum(r1$good%in%c(2,10))==2) print("But do not mix spicy and beef together.")
-  if(sum(r1$bad)!=0) print(paste("less ",combo_word[r1$bad],sep=""))
-  if(sum(r1$bad%in%c(3,4))==2) print("But you can try to mix bitter and salty food together.")
+suggestion=function(r){
+  print(paste("more ",taste_word[r$tastegood],sep=""))
+  if(r$tastebad!=0) print(paste("less ",taste_word[r$tastebad],sep=""))
+  print(paste("more ",food_word[r$foodgood],sep=""))
+  if(r$foodbad!=0) print(paste("less ",food_word[r$foodbad],sep=""))
+  print(paste("more ",drink_word[r$drinkgood],sep=""))
+  if(r$drinkbad!=0) print(paste("less ",drink_word[r$drinkbad],sep=""))
 }
 
-id=Chinese_food_business_ID[4]
-r1=getparameter(id)
-suggestion(r1)
 
-write.csv(Chinese_food_review,"Chinese_food_review.csv")
-write.csv(review_vs_word_matix,"review_vs_word_matrix.csv")
-write.csv(Open[Chinese_food,],"Chinese_food_information.csv")
+#example
+id=Chinese_food_business_ID[5]
+r=getparameter(id)
+suggestion(r)
+
