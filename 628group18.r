@@ -300,65 +300,6 @@ p_values
 
 
 
-#suggestion function
-getparameter=function(id){
-  index=which(id==Chinese_food_review$business_id)
-  if(length(index)==0){
-    return("Your given id is not a Chinese restaurant!")
-  }
-  else{
-    matrix_taste=review_vs_word_matix[index,index_taste]
-    matrix_food=review_vs_word_matix[index,index_food]
-    matrix_drink=review_vs_word_matix[index,index_drink]
-    r=c()
-    temp=c()
-    for(i in 1:8){
-      temp[i]=sum(matrix_taste[,i])
-    }
-    #good:sweet,spicy,bland,crispy (corresponding to 1,2,5,7)
-    #bad:salty,greasy (corresponding to 4,8)
-    tempgood=temp[c(1,2,5,7)]
-    tempbad=temp[c(4,8)]
-    r$tastegood=c(1,2,5,7)[which(tempgood==min(tempgood))[1]]
-    r$tastebad=ifelse(max(tempbad)>0,c(4,8)[which(tempbad==max(tempbad))[1]],0)
-    temp=c()
-    for(i in 1:8){
-      temp[i]=sum(matrix_food[,i])
-    }
-    #good:cream,sushi,steak (corresponding to 5,7,8)
-    #bad:burger,chicken (corresponding to 2,4)
-    tempgood=temp[c(5,7,8)]
-    tempbad=temp[c(2,4)]
-    r$foodgood=c(5,7,8)[which(tempgood==min(tempgood))[1]]
-    r$foodbad=ifelse(max(tempbad)>0,c(2,4)[which(tempbad==max(tempbad))[1]],0)
-    temp=c()
-    for(i in 1:7){
-      temp[i]=sum(matrix_drink[,i])
-    }
-    #good:coffee,tea,wine (corresponding to 2,4,6)
-    #bad:water (corresponding to 7)
-    tempgood=temp[c(2,4,6)]
-    r$drinkgood=c(2,4,6)[which(tempgood==min(tempgood))[1]]
-    if(temp[7]>0) r$drinkbad=7
-    else r$drinkbad=0
-  }
-  return(r)#for each components, a value is corresponding to a word, 0 means no bad word need to be improved.
-}
-
-suggestion=function(r){
-  print(paste("more ",taste_word[r$tastegood],sep=""))
-  if(r$tastebad!=0) print(paste("less ",taste_word[r$tastebad],sep=""))
-  print(paste("more ",food_word[r$foodgood],sep=""))
-  if(r$foodbad!=0) print(paste("less ",food_word[r$foodbad],sep=""))
-  print(paste("more ",drink_word[r$drinkgood],sep=""))
-  if(r$drinkbad!=0) print(paste("less ",drink_word[r$drinkbad],sep=""))
-}
-
-
-#example
-id=Chinese_food_business_ID[5]
-r=getparameter(id)
-suggestion(r)
 
 getparameter1=function(id){
   index=which(id==Chinese_food_review$business_id)
