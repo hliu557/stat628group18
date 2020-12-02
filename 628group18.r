@@ -359,3 +359,38 @@ suggestion=function(r){
 id=Chinese_food_business_ID[5]
 r=getparameter(id)
 suggestion(r)
+
+getparameter1=function(id){
+  index=which(id==Chinese_food_review$business_id)
+  if(length(index)==0){
+    return("Your given id is not a Chinese restaurant!")
+  }
+  else{
+    matrix_combo=review_vs_word_matix[index,index_combo]
+    r=c()
+    temp=c()
+    for(i in 1:12){
+      temp[i]=sum(matrix_combo[,i])
+    }
+    #good: corresponding to 1,2,7,10,11,12
+    #bad:corresponding to 3,4,5,6,8,9
+    tempgood=temp[c(1,2,7,10,11,12)]
+    tempbad=temp[c(3,4,5,6,8,9)]
+    r$good=c(1,2,7,10,11,12)[which(tempgood%in%sort(tempgood)[1:2])[1:2]]
+    if(max(tempbad)==0) r$bad=0
+    else r$bad=c(3,4,5,6,8,9)[which(tempbad%in%sort(tempbad,decreasing=TRUE)[1:2])[1:2]]
+  }
+  return(r)#for each components, a value is corresponding to a word, 0 means no bad word need to be improved.
+}
+
+suggestion1=function(r1){
+  print(paste("more ",combo_word[r1$good],sep=""))
+  if(sum(r1$good%in%c(1,2))==2) print("But do not mix spicy and sweet food together.")
+  if(sum(r1$good%in%c(2,10))==2) print("But do not mix spicy and beef together.")
+  if(sum(r1$bad)!=0) print(paste("less ",combo_word[r1$bad],sep=""))
+  if(sum(r1$bad%in%c(3,4))==2) print("But you can try to mix bitter and salty food together.")
+}
+
+id=Chinese_food_business_ID[4]
+r1=getparameter1(id)
+suggestion1(r1)
