@@ -308,56 +308,34 @@ getparameter=function(id){
     return("Your given id is not a Chinese restaurant!")
   }
   else{
-    matrix_taste=review_vs_word_matix[index,index_taste]
-    matrix_food=review_vs_word_matix[index,index_food]
-    matrix_drink=review_vs_word_matix[index,index_drink]
+    matrix_combo=review_vs_word_matix[index,index_combo]
     r=c()
     temp=c()
-    for(i in 1:8){
-      temp[i]=sum(matrix_taste[,i])
+    for(i in 1:12){
+      temp[i]=sum(matrix_combo[,i])
     }
-    #good:sweet,spicy,bland,crispy (corresponding to 1,2,5,7)
-    #bad:salty,greasy (corresponding to 4,8)
-    tempgood=temp[c(1,2,5,7)]
-    tempbad=temp[c(4,8)]
-    r$tastegood=c(1,2,5,7)[which(tempgood==min(tempgood))[1]]
-    r$tastebad=ifelse(max(tempbad)>0,c(4,8)[which(tempbad==max(tempbad))[1]],0)
-    temp=c()
-    for(i in 1:8){
-      temp[i]=sum(matrix_food[,i])
-    }
-    #good:cream,sushi,steak (corresponding to 5,7,8)
-    #bad:burger,chicken (corresponding to 2,4)
-    tempgood=temp[c(5,7,8)]
-    tempbad=temp[c(2,4)]
-    r$foodgood=c(5,7,8)[which(tempgood==min(tempgood))[1]]
-    r$foodbad=ifelse(max(tempbad)>0,c(2,4)[which(tempbad==max(tempbad))[1]],0)
-    temp=c()
-    for(i in 1:7){
-      temp[i]=sum(matrix_drink[,i])
-    }
-    #good:coffee,tea,wine (corresponding to 2,4,6)
-    #bad:water (corresponding to 7)
-    tempgood=temp[c(2,4,6)]
-    r$drinkgood=c(2,4,6)[which(tempgood==min(tempgood))[1]]
-    if(temp[7]>0) r$drinkbad=7
-    else r$drinkbad=0
+    #good: corresponding to 1,2,7,10,11,12
+    #bad:corresponding to 3,4,5,6,8,9
+    tempgood=temp[c(1,2,7,10,11,12)]
+    tempbad=temp[c(3,4,5,6,8,9)]
+    r$good=c(1,2,7,10,11,12)[which(tempgood%in%sort(tempgood)[1:2])[1:2]]
+    if(max(tempbad)==0) r$bad=0
+    else r$bad=c(3,4,5,6,8,9)[which(tempbad%in%sort(tempbad,decreasing=TRUE)[1:2])[1:2]]
   }
   return(r)#for each components, a value is corresponding to a word, 0 means no bad word need to be improved.
 }
 
-suggestion=function(r){
-  print(paste("more ",taste_word[r$tastegood],sep=""))
-  if(r$tastebad!=0) print(paste("less ",taste_word[r$tastebad],sep=""))
-  print(paste("more ",food_word[r$foodgood],sep=""))
-  if(r$foodbad!=0) print(paste("less ",food_word[r$foodbad],sep=""))
-  print(paste("more ",drink_word[r$drinkgood],sep=""))
-  if(r$drinkbad!=0) print(paste("less ",drink_word[r$drinkbad],sep=""))
+suggestion=function(r1){
+  print(paste("more ",combo_word[r1$good],sep=""))
+  if(sum(r1$good%in%c(1,2))==2) print("But do not mix spicy and sweet food together.")
+  if(sum(r1$good%in%c(2,10))==2) print("But do not mix spicy and beef together.")
+  if(sum(r1$bad)!=0) print(paste("less ",combo_word[r1$bad],sep=""))
+  if(sum(r1$bad%in%c(3,4))==2) print("But you can try to mix bitter and salty food together.")
+  if(sum(r1$bad%in%c(4,8))==2) print("But you can try to mix chicken with bland taste together.")
+  if(sum(r1$bad%in%c(4,9))==2) print("But you can try to mix fish with bland taste together.")
 }
 
-
-#example
-id=Chinese_food_business_ID[5]
-r=getparameter(id)
-suggestion(r)
+id=Chinese_food_business_ID[4]
+r1=getparameter(id)
+suggestion(r1)
 
