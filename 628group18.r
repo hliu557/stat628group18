@@ -338,3 +338,6 @@ id=Chinese_food_business_ID[4]
 r1=getparameter(id)
 suggestion(r1)
 
+write.csv(Chinese_food_review,"Chinese_food_review.csv")
+write.csv(review_vs_word_matix,"review_vs_word_matrix.csv")
+write.csv(Open[Chinese_food,1:9],"Chinese_food_information.csv")
