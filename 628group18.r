@@ -328,7 +328,6 @@ getparameter=function(id){
 suggestion=function(r1){
   print(paste("more ",combo_word[r1$good],sep=""))
   if(sum(r1$good%in%c(1,2))==2) print("But do not mix spicy and sweet food together.")
-  if(sum(r1$good%in%c(2,10))==2) print("But do not mix spicy and beef together.")
   if(sum(r1$bad)!=0) print(paste("less ",combo_word[r1$bad],sep=""))
   if(sum(r1$bad%in%c(3,4))==2) print("But you can try to mix bitter and salty food together.")
   if(sum(r1$bad%in%c(4,8))==2) print("But you can try to mix chicken with bland taste together.")
